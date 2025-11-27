@@ -8,22 +8,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="favicon.ico" type="image/x-icon">   
     <style type="text/css">
-    body {
-        background-color: #18181b;
+    html, body {
+        height: 100%;
         margin: 0;
         padding: 0;
+        background-color: #18181b;
         color: #e2e2e8;
         font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        
     }
-    div {
+    /* The matrix background container (full-screen, behind content) */
+    #matrix-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none; /* clicks pass through to page content */
+        background-color: #000; /* fallback */
+    }
+
+    /* keep your content above the background */
+    .content {
+        position: relative;
+        z-index: 1;
         width: 600px;
         margin: 5em auto;
         padding: 2em;
-        background-color: #232335;
+        background-color: #1a1a29;
         border-radius: 0.5em;
         box-shadow: 2px 3px 14px 4px rgba(0,0,0,0.24);
     }
+
     a:link, a:visited {
         color: #8cb4ff;
         text-decoration: none;
@@ -33,7 +50,7 @@
         text-decoration: underline;
     }
     pre {
-        background-color: #181826;
+        background-color: #11111c;
         color: #e5e7ef;
         padding:10px;
         border-radius:6px;
@@ -41,7 +58,7 @@
         overflow-x: auto;
     }
     @media (max-width: 700px) {
-        div {
+        .content {
             margin: 0 auto;
             width: auto;
         }
@@ -50,20 +67,135 @@
 </head>
 
 <body>
-<div>
-    <img src="https://avatars.githubusercontent.com/u/91847844" width="192" height="192" style="display: block; margin-left: auto; margin-right: auto; border-radius: 5%;">
-    <h1 style="text-align: center;">yeeter727's webserver</h1>
-    <p>This server is not for use in illustrative examples. You may not use this
-    domain in literature without prior coordination or asking for permission. Violators will be punished.</p>
-    <br>
-<pre>IyEvYmluL2Jpbi9iaW4vYmluLy4uLyQod2hvYW1pKS9jLnNoCmtpbmRhIHdlaXJkIHlvdSB3b
-3VsZCBldmVuIHdhc3RlIHlvdXIgdGltZSBkb2luZyB0aGlzLgovc3RvcmFnZS9lbXVsYXRlZC
-8wL1Rlcm11eC9CYWNrdXAvaG9tZS5iYWsKZWNobyAkSE9TVApvd25lciA9ICJudWxsIgpEaXJ
-lY3RvcnkgaXMgZW1wdHkKb3BlbiBmaWxlIG1hbmFnZW1lbnQgbWVudQpSRU0gZ3JlcCByb290
-IC9ldGMvcGFzc3dkCg==</pre>
+    <!-- matrix background element (script will populate it) -->
+    <div id="matrix-bg"></div>
 
-<!-- <a href='https://www.youtube.com/watch?v=Xvcky8ZQ6XY'>8ZQ6XY</a> -->
+    <div class="content">
+        <img src="https://avatars.githubusercontent.com/u/91847844" width="192" height="192" style="display: block; margin-left: auto; margin-right: auto; border-radius: 5%;">
+        <h1 style="text-align: center;">yeeter727's webserver</h1>
+        <p>This server is not for use in illustrative examples. You may not use this
+        domain in literature without prior coordination or asking for permission. Violators will be punished.</p>
+        <br>
+        <pre>IyEvYmluL2Jpbi9iaW4vYmluLy4uLyQod2hvYW1pKS9jLnNoCjlBNjhBREQxMkVCNTBEREU3
+NTg2NzgyQzNFQjlGRjlDCi9zdG9yYWdlL2VtdWxhdGVkLzAvVGVybXV4L0JhY2t1cC9ob21l
+LmJhawplY2hvICRIT1NUCm93bmVyID0gIm51bGwiCkRpcmVjdG9yeSBpcyBlbXB0eQpvcGVu
+IGZpbGUgbWFuYWdlbWVudCBtZW51ClJFTSBncmVwIHJvb3QgL2V0Yy9wYXNzd2QKaHR0cDov
+L2Y1Mjg3NjRkNjI0ZGIxMjliMzJjMjFmYmNhMGNiOGQ2Ly4uLy4uLy4uLy4uL2V0Yy9zaGFk
+b3c=</pre>
 
-</div>
+    <!-- <a href='https://www.youtube.com/watch?v=Xvcky8ZQ6XY'>8ZQ6XY</a> -->
+    <!-- <a href='https://whitehouse.net/'>The White House</a> -->
+
+    </div>
+
+<script>
+/*
+  Adapted "matrix rain" JS 
+  Press "S" to pause/resume the rain (same keybinding as the original).
+*/
+(function(){
+  var wn = window, dc = document;
+  var bg = dc.getElementById('matrix-bg');
+  var o = {}; // active intervals per column
+  var mInterval, t = 1;
+  var charset = 'yeeter727';
+  //var charset = '!"#$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
+
+  function r(d, m){ return Math.floor(Math.random()*d) + m; }
+
+  function advance(id){
+    var el = dc.getElementById(id);
+    if (!el) return;
+    var top = parseInt(el.style.top, 10) || 0;
+    if (top < window.innerHeight){
+      el.style.top = (top + 10) + 'px';
+    } else {
+      clearInterval(o[id]);
+      if (el.parentNode) el.parentNode.removeChild(el);
+      delete o[id];
+    }
+  }
+
+  function spawn(){
+    var d = dc.createElement('div');
+    var dt = new Date(), id = 'm_' + dt.getTime();
+    var ds = d.style;
+    var j = 0, u = [], l = r(21,4), q = charset.length, p;
+    d.id = id;
+
+    ds.width = '12px';
+    ds.opacity = (Math.random()*0.4 + 0.3).toFixed(2);
+    var fontSize = r(12,12) + 'px';
+    ds.fontSize = fontSize;
+    ds.lineHeight = fontSize;
+    ds.color = 'red';              // change color here
+    ds.position = 'absolute';
+    ds.left = r(window.innerWidth, 0) + 'px';
+    ds.whiteSpace = 'pre';
+    ds.textAlign = 'center';
+    while(j < l){
+      p = r(q,0);
+      u[j] = charset.substring(p, p+1);
+      j++;
+    }
+    d.textContent = u.join("\n");
+    bg.appendChild(d);
+    // start above viewport
+    ds.top = -d.offsetHeight + 'px';
+    o[id] = setInterval(function(){ advance(id); }, r(20,40));
+    // remove very old columns if too many
+    var keys = Object.keys(o);
+    if (keys.length > 300) {
+      // remove oldest
+      var oldest = keys[0];
+      clearInterval(o[oldest]);
+      var el = dc.getElementById(oldest);
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+      delete o[oldest];
+    }
+  }
+
+  function init(){
+    // keep background size up-to-date
+    wn.addEventListener('resize', function(){ /* nothing needed: uses innerWidth/innerHeight on spawn */ }, false);
+    // toggle with "S"
+    dc.addEventListener('keydown', function(e){
+      if (e.key === 's' || e.key === 'S' || e.keyCode === 83){
+        if (t) {
+          clearInterval(mInterval);
+          // clear all column timers
+          Object.keys(o).forEach(function(k){ clearInterval(o[k]); });
+        } else {
+          mInterval = setInterval(spawn, 25);
+        }
+        t = !t;
+      }
+    }, false);
+
+    // start spawning columns
+    mInterval = setInterval(spawn, 25);
+  }
+
+  // ensure bg exists (it should from markup), but create if not present
+  if (!bg) {
+    console.log("Couldn't find bg, created it instead.")
+    bg = dc.createElement('div');
+    bg.id = 'matrix-bg';
+    bg.style.position = 'fixed';
+    bg.style.top = '0';
+    bg.style.left = '0';
+    bg.style.width = '100%';
+    bg.style.height = '100%';
+    bg.style.overflow = 'hidden';
+    bg.style.zIndex = '0';
+    bg.style.pointerEvents = 'none';
+    bg.style.backgroundColor = '#000';
+    document.body.insertBefore(bg, document.body.firstChild);
+  }
+
+  init();
+})();
+</script>
+
 </body>
 </html>
