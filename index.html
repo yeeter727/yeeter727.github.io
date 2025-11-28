@@ -15,18 +15,18 @@
         background-color: #18181b;
         color: #e2e2e8;
         font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        overflow-x: hidden;
     }
     /* The matrix background container (full-screen, behind content) */
     #matrix-bg {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        inset: 0;                 /* top:0; right:0; bottom:0; left:0; */
+        width: 100vw;
+        height: 100vh;
         overflow: hidden;
         z-index: 0;
-        pointer-events: none; /* clicks pass through to page content */
-        background-color: #000; /* fallback */
+        pointer-events: none;      /* clicks pass through to page content */
+        background-color: #000;  /* fallback */
     }
 
     /* keep your content above the background */
@@ -90,8 +90,8 @@ b3c=</pre>
 
 <script>
 /*
-  Adapted "matrix rain" JS 
-  Press "S" to pause/resume the rain (same keybinding as the original).
+  Adapted matrix rain JS 
+  Press "S" to pause/resume the rain.
 */
 (function(){
   var wn = window, dc = document;
@@ -120,12 +120,12 @@ b3c=</pre>
     var d = dc.createElement('div');
     var dt = new Date(), id = 'm_' + dt.getTime();
     var ds = d.style;
-    var j = 0, u = [], l = r(21,4), q = charset.length, p;
+    var j = 0, u = [], l = charset.length, q = charset.length, p;    // use this to make col length random: l = r(21,4)
     d.id = id;
 
     ds.width = '12px';
     ds.opacity = (Math.random()*0.4 + 0.3).toFixed(2);
-    var fontSize = r(12,12) + 'px';
+    var fontSize = r(14,14) + 'px';
     ds.fontSize = fontSize;
     ds.lineHeight = fontSize;
     ds.color = 'red';              // change color here
