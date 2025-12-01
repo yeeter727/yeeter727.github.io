@@ -145,7 +145,8 @@ b3c=</pre>
     ds.textAlign = 'center';
 
     // Choose column length (random), but cap to charset length so we can sample without replacement
-    var desiredLen = r(21,4); // e.g. random length between 4 and 24
+    //var desiredLen = r(21,4); // e.g. random length between 4 and 24
+    var desiredLen = charset.length; // e.g. random length between 4 and 24
     var available = charset.length;
     var l = Math.min(desiredLen, available);
 
