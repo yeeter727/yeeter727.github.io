@@ -98,10 +98,21 @@ b3c=</pre>
   var bg = dc.getElementById('matrix-bg');
   var o = {}; // active intervals per column
   var mInterval, t = 1;
-  var charset = 'yeeter727';
+  var charset = 'yeeter727'; 
   //var charset = '!"#$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
-
+  // helper: random int in [m, d+m-1]
   function r(d, m){ return Math.floor(Math.random()*d) + m; }
+
+  // Fisher-Yates shuffle (in-place)
+  function shuffle(arr){
+    for (let i = arr.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = tmp;
+    }
+    return arr;
+  }
 
   function advance(id){
     var el = dc.getElementById(id);
@@ -118,35 +129,41 @@ b3c=</pre>
 
   function spawn(){
     var d = dc.createElement('div');
-    var dt = new Date(), id = 'm_' + dt.getTime();
+    var dt = new Date(), id = 'm_' + dt.getTime() + '_' + Math.floor(Math.random() * 1000);
     var ds = d.style;
-    var j = 0, u = [], l = charset.length, q = charset.length, p;    // use this to make col length random: l = r(21,4)
-    d.id = id;
 
+    d.id = id;
     ds.width = '12px';
     ds.opacity = (Math.random()*0.4 + 0.3).toFixed(2);
     var fontSize = r(14,14) + 'px';
     ds.fontSize = fontSize;
     ds.lineHeight = fontSize;
-    ds.color = 'red';              // change color here
+    ds.color = 'red';
     ds.position = 'absolute';
     ds.left = r(window.innerWidth, 0) + 'px';
     ds.whiteSpace = 'pre';
     ds.textAlign = 'center';
-    while(j < l){
-      p = r(q,0);
-      u[j] = charset.substring(p, p+1);
-      j++;
-    }
+
+    // Choose column length (random), but cap to charset length so we can sample without replacement
+    var desiredLen = r(21,4); // e.g. random length between 4 and 24
+    var available = charset.length;
+    var l = Math.min(desiredLen, available);
+
+    // Build an array of single-character strings
+    var chars = charset.split('');
+    shuffle(chars);            // shuffle in-place
+    var u = chars.slice(0, l); // take first l unique chars for the column
+
     d.textContent = u.join("\n");
     bg.appendChild(d);
     // start above viewport
     ds.top = -d.offsetHeight + 'px';
     o[id] = setInterval(function(){ advance(id); }, r(20,40));
+
     // remove very old columns if too many
     var keys = Object.keys(o);
     if (keys.length > 300) {
-      // remove oldest
+      // remove oldest (insertion order of object keys is preserved)
       var oldest = keys[0];
       clearInterval(o[oldest]);
       var el = dc.getElementById(oldest);
@@ -156,8 +173,6 @@ b3c=</pre>
   }
 
   function init(){
-    // keep background size up-to-date
-    wn.addEventListener('resize', function(){ /* nothing needed: uses innerWidth/innerHeight on spawn */ }, false);
     // toggle with "S"
     dc.addEventListener('keydown', function(e){
       if (e.key === 's' || e.key === 'S' || e.keyCode === 83){
